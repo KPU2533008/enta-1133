@@ -6,7 +6,7 @@ namespace GD12_1133_Lab2_Peskoff_Rob
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello, it is currently " + DateTime.Now.ToString() + " and we are going to print some number");
+            Console.WriteLine("Hello, it is currently " + DateTime.Now + " and we are going to print some number");
 
             /*
                 // :)
