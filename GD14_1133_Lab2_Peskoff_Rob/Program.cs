@@ -1,6 +1,6 @@
 ﻿//using System.Numerics;
 
-namespace GD12_1133_Lab2_Peskoff_Rob
+namespace GD14_1133_Lab2_Peskoff_Rob
 {
     internal class Program
     {
