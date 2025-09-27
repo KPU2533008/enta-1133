@@ -1,43 +1,203 @@
 ﻿using GD14_1133_DiceGame_Peskoff_Rob.Game.Object;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using GD14_1133_DiceGame_Peskoff_Rob.Game.Util;
+using Microsoft.VisualBasic;
+using System.Reflection.Metadata.Ecma335;
 
 namespace GD14_1133_DiceGame_Peskoff_Rob.Game {
 	internal class DiceGameRunner {
 
-		// Typing Console.WriteLine over and over is really annoying
-		private static void print(string msg = "") {
-			Console.WriteLine(msg);
+		private static string[] badListener = [
+			"WOW, OUR CHALLENGER DIDN'T FOLLOW THE INSTRUCTIONS AT ALL!!! GO AHEAD AND TRY THAT AGAIN FOR ME...!!!",
+			"OUR NEWEST CHALLENGER NEEDS TO GET THEIR EARS CHECKED, BECAUSE THEY HAVE TROUBLE LISTENING...!!!",
+			"IT MUST BE OPPOSITE DAY BECAUSE OUR CHALLENGER DID THE POLAR OPPOSITE OF WHAT THEY WERE ASKED!! LET'S TRY IT AGAIN...!",
+			"*ALREADY* OUR CHALLENGER IS USING MIND GAMES TO TRY AND THROW OFF THE COMPETITION!!! BUT I NEED YOU TO FOLLOW INSTRUCTIONS, SO GIVE IT ANOTHER SHOT!!!"
+		];
+
+		internal void ShowIntroText(string playerName) {
+			Sugar.Wait(0.3f);
+			Display.PrintTypewriter($"\nEVERYONE PLEASE WELCOME OUR NEWEST CHALLENGER");
+			Display.PrintTypewriter("...", 1);
+			Display.PrintTypewriter($" {playerName}", 1.0f / 120);
+			Display.PrintTypewriter("!!!!!!!!!!!!!!!!", 0.1f);
+
+			if ( GameSettings.FLAVOR_TEXT_ENABLED ) {
+				Sugar.Wait(1);
+				Display.PrintTypewriter($"\nTODAY, ON THIS BEAUTIFUL {Strings.UCase(DateTime.Now.ToString("MMMM"))} DAY, YOU'LL BE GOING HEAD TO HEAD AGAINST OUR REIGNING CHAMP");
+				Display.PrintTypewriter("...", 1);
+				Sugar.Wait(1);
+				Display.PrintTypewriter("\n\nCHRISTINA PERSEPHONE UMBELTON OF THE APOSTLES OF MAGIC DICE");
+				Display.PrintTypewriter("!!!!!!!", 0.1f);
+				Sugar.Wait(1);
+				Display.PrintTypewriter("\n\nAKA...");
+				Sugar.Wait(1);
+				Display.PrintTypewriter("\n\nTHE NOTORIOUS", 1.0f / 120);
+				Sugar.Wait(1);
+				Display.PrintTypewriter("\nCPU", 1, true);
+				Display.Print(" OF ");
+				Sugar.Wait(1);
+				Display.PrintTypewriter("AMD", 1, false);
+				Display.PrintTypewriter("!!!!!!!", 0.1f);
+			}
+
+			Sugar.Wait(2);
+		}
+
+		internal string PromptCoinFaceCall(string playerName) {
+			Random rng = new();
+			string coinCall = "";
+
+			Display.PrintTypewriter("\n\nBUT FIRST, LET'S DECIDE TURN ORDER WITH A COIN FLIP!!!");
+			Sugar.Wait(1);
+			Display.PrintTypewriter($"\n{playerName}, GO AHEAD AND CALL HEADS OR TAILS!!!\n");
+			Sugar.Wait(1);
+
+			while ( true ) {
+				string? input = Console.ReadLine();
+				Display.PrintLn("");
+				coinCall = Strings.LCase(input ?? "");
+
+				if ( coinCall == "heads" || coinCall == "tails" ) {
+					break;
+				}
+
+				Display.PrintTypewriter($"{badListener[rng.Next(0, badListener.Length)]}", 1.0f / 120);
+				Sugar.Wait(1);
+				Display.PrintTypewriter($"\n{playerName}, GO AHEAD AND CALL HEADS OR TAILS!!!\n");
+			}
+
+			return coinCall;
+		}
+
+		internal Dice PromptPlayerDieSelection(Player player) {
+			Sugar.Wait(0.5f);
+
+			int chosenDieNum = -1;
+
+			if ( player.isHuman ) {
+				Display.PrintTypewriter($"\nHERE ARE YOUR AVAILABLE DICE:");
+				for ( int i = 0; i < player.dice.Count; i++ ) {
+					Display.PrintTypewriter($"\n{i + 1}) {player.dice[i].GetDieType()}");
+				}
+
+				/*
+				 * Input validation:
+				 * Continually loop, grabbing player input. If they enter something that parses to an int,
+				 * check to make sure that there's actually a die in that position in the list. For example,
+				 * if they enter -1, we shouldn't accept that even though it's a valid int. Conversely, if
+				 * their input doesn't parse to int, run through all the dice in their list of available dice
+				 * and see if what they entered matches that die's type. If it does, we'll select that die.
+				 * 
+				 * Once we have a valid input in-hand and a die chosen, break the loop.
+				 */
+				while ( true ) {
+					Display.Print("\n");
+					string input = Console.ReadLine() ?? "";
+					bool success = int.TryParse(input, out chosenDieNum);
+
+					if ( success ) {
+						if ( Math.Clamp(chosenDieNum, 1, player.dice.Count) == chosenDieNum ) {
+							chosenDieNum--;
+							break;
+						} else {
+							chosenDieNum = -1;
+						}
+					} else {
+						for ( int i = 0; i < player.dice.Count; i++ ) {
+							if ( player.dice[i].GetDieType() == input ) {
+								chosenDieNum = i;
+								break;
+							}
+						}
+						if ( chosenDieNum != -1 )
+							break;
+					}
+
+					Display.PrintTypewriter($"\nPLEASE CHOOSE ONE OF THE DICE ABOVE!");
+				}
+			} else {
+				Sugar.Wait(1);
+				Random rng = new();
+				chosenDieNum = rng.Next(0, player.dice.Count);
+				Display.Print("\n");
+			}
+
+			Dice chosenDie = player.dice[chosenDieNum];
+			player.dice.RemoveAt(chosenDieNum);
+			Display.PrintTypewriter($"\n{player.ToString().ToUpper()} HAS CHOSEN THEIR {chosenDie.GetDieType().ToUpper()}!!!!!");
+
+			return chosenDie;
 		}
 
 		internal void RunGame() {
-			print("Welcome to Rob Peskoff's D&D simulator! The date is " + DateTime.Now + ".");
+			Display.PrintTypewriter("\nWELCOME TO THE DICE GAME!!!");
+			Sugar.Wait(1);
+			Display.Print("\n\n");
 
-			int[] diceTypes = { 6, 8, 12, 20 };
-			int score = 0;
+			Random rng = new();
+			Player player1 = new();
+			Player player2 = new("CPU");
+			List<Player> playerTurnOrder = [];
 
-			for ( int i = 0; i < diceTypes.Length; i++ ) {
-				Dice die = new(diceTypes[i]);
-				die.Roll();
-				print("Roll " + (i + 1) + ":\t\t" + die);
-				score += die.GetLastRoll();
+			string uppercaseP1 = Strings.UCase(player1.ToString());
+
+			ShowIntroText(uppercaseP1);
+			string coinCall = PromptCoinFaceCall(uppercaseP1);
+
+			Display.PrintTypewriter($"THANKS YOU VERY MUCH!!! OUR CHALLENGER HAS CALLED {Strings.UCase(coinCall)}!!! LET'S FLIP THAT COIN!!!");
+			Sugar.Wait(1);
+			Display.PrintTypewriter("\nAND THE RESULT IS...");
+
+			Sugar.Wait(1);
+			string coinFlipResult = rng.Next(0, 2) == 0 ? "heads" : "tails";
+			Display.PrintTypewriter($"\n\n{Strings.UCase(coinFlipResult)}!!!");
+			Sugar.Wait(1.25f);
+
+			if ( coinFlipResult == coinCall ) {
+				Display.PrintTypewriter("\n\nCONGRATULATIONS CHALLENGER, YOU GET TO GO FIRST!!!");
+				playerTurnOrder.Add(player1);
+				playerTurnOrder.Add(player2);
+			} else {
+				Display.PrintTypewriter("\n\nOUCH... TOO BAD CHALLENGER, LOOKS LIKE THE REIGNING CHAMP IS UP FIRST!!!");
+				playerTurnOrder.Add(player2);
+				playerTurnOrder.Add(player1);
 			}
 
-			print("Final score:\t" +  score + "\n\n\n");
+			Sugar.Wait(1);
 
-			print("Operator Explanations:\n");
-			print("The + operator takes the operands on the left and right side of it and adds them together, returning the resulting value. For instance, in the following example:\nint sum = 2 + 2;\nThe variable `sum` would be equal to 4.\n\n");
-			print("The - operator takes the operands on the left and right side of it and subtracts them from each other, returning the resulting value. For instance, in the following example:\nint diff = 9 - 4;\nThe variable `diff` would be equal to 5.\n\n");
-			print("The * operator takes the operands on the left and right side of it and multiplies them together, returning the resulting value. For instance, in the following example:\nint product = 4 * 4;\nThe variable `product` would be equal to 16.\n\n");
-			print("The / operator takes the operand on the left side and divides it by the operand on the right side, returning the resulting value. For instance, in the following example:\nint quotient = 24 / 3;\nThe variable `quotient` would be equal to 8.\n\n");
-			print("The ++ operator takes the operand to its left and adds one to it, returning the resulting value. If the operand is a variable, the new value will be assigned to the variable, however this happens after remaining operations. The secret word is bananas. For instance, in the following example:\nint points = 45;\nint sum = 4 + (points++);\nThe variable `points` would be equal to 46 and the variable `sum` would be equal to 49, since the previous value for `points` is used in the calculation of `sum`.\n\n");
-			print("The -- operator takes the operand to its right and subtracts one from it, returning the resulting value. If the operand is a variable, the new value will be assigned to the variable, however this happens after remaining operations. For instance, in the following example:\nint apples = 23;\nint oranges = 12;\nint fruit = oranges + (apples--);\nThe variable `apples` would be equal to 22, `oranges` would be 12, and `fruit` would be 35, since the previous value for `apples` is used in the calculation of `fruit`.\n\n");
-			print("The % operator takes the operand to its left and divides it by the operand to its right, returning remainder of the division operation. For instance, in the following example:\nint remainder = 5 % 2;\nThe variable `remainder` would be equal to 1.\n");
-			
-			print("\n\nGoodbye, and thank you for coming to my TED Talk.\n\n\n\n");
+			// TODO: Put this all into a loop
+			Dictionary<Player, int> rolls = new();
+
+			for ( int i = 0; i < playerTurnOrder.Count; i++ ) {
+				Player player = playerTurnOrder[i];
+				Display.PrintTypewriter($"\n\n{player.ToString().ToUpper()}, IT'S YOUR ROLL! CHOOSE A DIE TO THROW!");
+				Dice chosenDice = PromptPlayerDieSelection(player);
+
+				Sugar.Wait(1);
+				Display.PrintTypewriter("\nALRIGHT, LET'S ROLL THAT DIE!!!!");
+				Sugar.Wait(1);
+				Display.PrintTypewriter("\nAND THE RESULT IS...");
+				Sugar.Wait(1);
+				rolls.Add(player, chosenDice.Roll());
+				Display.PrintTypewriter($"\n\n{rolls[player]}!!!!!!!");
+				Sugar.Wait(1);
+			}
+
+			// Highest roll is automatically assigned to the player who won the coin toss.
+			// We do this so that in the case of a tie, the coin toss winner wins the round.
+			KeyValuePair<Player, int> highestRoll = KeyValuePair.Create(playerTurnOrder[0], rolls[playerTurnOrder[0]]);
+
+			foreach ( KeyValuePair<Player, int> roll in rolls ) {
+				if ( roll.Key == highestRoll.Key )
+					continue;
+
+				if ( roll.Value > highestRoll.Value ) {
+					highestRoll = roll;
+				} else if ( roll.Value == highestRoll.Value ) {
+					Display.PrintTypewriter($"\n\nIT APPEARS AS THOUGH THERE IS A TIE... THEREFORE THIS ROUND GOES TO THE WINNER OF THE COIN TOSS...");
+				}
+			}
+
+			Display.PrintTypewriter($"\nTHE WINNER IS... {highestRoll.Key}!!!!!!!");
 		}
 
 	}
