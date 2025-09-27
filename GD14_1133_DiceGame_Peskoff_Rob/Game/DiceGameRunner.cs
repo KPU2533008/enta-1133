@@ -92,14 +92,13 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.Game {
 				while ( true ) {
 					Display.Print("\n");
 					string input = Console.ReadLine() ?? "";
-					bool success = int.TryParse(input, out chosenDieNum);
+					int parsed;
+					bool success = int.TryParse(input, out parsed);
 
 					if ( success ) {
 						if ( Math.Clamp(chosenDieNum, 1, player.dice.Count) == chosenDieNum ) {
-							chosenDieNum--;
+							chosenDieNum = parsed - 1;
 							break;
-						} else {
-							chosenDieNum = -1;
 						}
 					} else {
 						for ( int i = 0; i < player.dice.Count; i++ ) {
@@ -108,9 +107,10 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.Game {
 								break;
 							}
 						}
-						if ( chosenDieNum != -1 )
-							break;
 					}
+
+					if ( chosenDieNum != -1 )
+						break;
 
 					Display.PrintTypewriter($"\nPLEASE CHOOSE ONE OF THE DICE ABOVE!");
 				}
