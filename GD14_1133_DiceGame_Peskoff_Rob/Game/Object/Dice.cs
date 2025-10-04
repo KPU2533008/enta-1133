@@ -17,7 +17,11 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.Game.Object {
 		}
 
 		public override string ToString() {
-			return "" + numDice + "d" + faces + "[" + lastRoll + "]";
+			return $"{numDice}{GetDieType()}[{lastRoll}]";
+		}
+
+		internal string GetDieType() {
+			return "d" + faces;
 		}
 
 		internal int Roll() {
