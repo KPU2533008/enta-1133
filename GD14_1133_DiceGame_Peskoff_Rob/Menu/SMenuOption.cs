@@ -1,11 +1,11 @@
 ﻿namespace GD14_1133_DiceGame_Peskoff_Rob.Menu {
-	internal struct IMenuOption {
+	internal struct SMenuOption {
 
 		public string name;
 		public string displayText;
-		public Func<bool?> onChosen;
+		public Func<SMenuActionResult> onChosen;
 
-		public IMenuOption(string name, string? displayText, Func<bool?> onChosen) {
+		public SMenuOption(string name, string? displayText, Func<SMenuActionResult> onChosen) {
 			this.name = name;
 			this.displayText = displayText ?? name;
 			this.onChosen = onChosen;

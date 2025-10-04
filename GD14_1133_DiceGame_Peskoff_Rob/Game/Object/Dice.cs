@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace GD14_1133_DiceGame_Peskoff_Rob.Game.Object {
+﻿namespace GD14_1133_DiceGame_Peskoff_Rob.Game.Object {
 	internal class Dice {
 
 		private readonly int faces;

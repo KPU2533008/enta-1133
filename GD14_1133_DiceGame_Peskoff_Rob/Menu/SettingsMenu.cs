@@ -1,4 +1,5 @@
 ﻿using GD14_1133_DiceGame_Peskoff_Rob.Game.Util;
+using GD14_1133_DiceGame_Peskoff_Rob.Util;
 
 namespace GD14_1133_DiceGame_Peskoff_Rob.Menu {
 	internal class SettingsMenu : IMenu {
@@ -15,7 +16,7 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.Menu {
 			return "SETTINGS_MENU";
 		}
 
-		public bool ShouldDisplayMenuName() {
+		public bool ShouldDisplayHeader() {
 			return true;
 		}
 
@@ -23,25 +24,24 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.Menu {
 			return new MainMenu();
 		}
 
-		public List<IMenuOption> GetMenuOptions(MenuManager menuManager) {
-			List<IMenuOption> inputOptions = new();
+		public List<SMenuOption> GetMenuOptions(MenuManager menuManager) {
+			List<SMenuOption> inputOptions = new();
 
-			inputOptions.Add(new("FlavorText", $"Flavor text enabled\t\t\t{GameSettings.FLAVOR_TEXT_ENABLED}", () => {
-				GameSettings.FLAVOR_TEXT_ENABLED = !GameSettings.FLAVOR_TEXT_ENABLED;
-				Display.PrintLn($"Flavor text is now {FormatSettingState(GameSettings.FLAVOR_TEXT_ENABLED)}");
-				return null;
-			}));
+			foreach ( KeyValuePair<string, bool> setting in GameSettings.SETTINGS ) {
+				string settingName = setting.Key;
+				string displayText = StringUtil.AddSpaces(settingName);
+				bool isEnabled = setting.Value;
 
-			inputOptions.Add(new("Typewriter", $"Typewriter enabled\t\t\t{GameSettings.TYPEWRITER_ENABLED}", () => {
-				GameSettings.TYPEWRITER_ENABLED = !GameSettings.TYPEWRITER_ENABLED;
-				Display.PrintLn($"Typewriter is now {FormatSettingState(GameSettings.TYPEWRITER_ENABLED)}");
-				return null;
-			}));
+				inputOptions.Add(new(settingName, $"{displayText} enabled{new String(' ', 30 - displayText.Length)}{isEnabled}", () => {
+					GameSettings.SetSetting(settingName, !isEnabled);
+					return new(null, $"{displayText} is now {FormatSettingState(!isEnabled)}");
+				}));
+			}
 
 			return inputOptions;
 		}
 
-		public void RenderMenu() {
+		public void Draw() {
 			Display.PrintLn("Type the number of a setting to turn it on or off or \"back\" to go back.");
 		}
 
