@@ -1,4 +1,4 @@
-﻿namespace GD14_1133_DiceGame_Peskoff_Rob.Input {
+﻿namespace GD14_1133_DiceGame_Peskoff_Rob.input {
 	internal class InputHandler {
 
 		private static int LOG_SIZE = 4;

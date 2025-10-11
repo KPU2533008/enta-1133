@@ -1,4 +1,4 @@
-﻿namespace GD14_1133_DiceGame_Peskoff_Rob.Util {
+﻿namespace GD14_1133_DiceGame_Peskoff_Rob.util {
 	internal class StringUtil {
 
 		private static bool IsUpper(string str) {

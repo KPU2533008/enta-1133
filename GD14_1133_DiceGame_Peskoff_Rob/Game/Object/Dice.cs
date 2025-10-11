@@ -1,4 +1,4 @@
-﻿namespace GD14_1133_DiceGame_Peskoff_Rob.Game.Object {
+﻿namespace GD14_1133_DiceGame_Peskoff_Rob.game.@object {
 	internal class Dice {
 
 		private readonly int faces;

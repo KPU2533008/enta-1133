@@ -1,14 +1,14 @@
 ﻿using GD14_1133_DiceGame_Peskoff_Rob.game.util;
 
 namespace GD14_1133_DiceGame_Peskoff_Rob.menu {
-	internal class MainMenu : IMenu {
+	internal class RenderingTest : IMenu {
 
 		public override string ToString() {
-			return "Main Menu";
+			return "Rendering Test";
 		}
 
 		public string GetMenuId() {
-			return "MAIN_MENU";
+			return "RENDERING_TEST";
 		}
 
 		public bool ShouldDisplayHeader() {

@@ -1,4 +1,4 @@
-﻿namespace GD14_1133_DiceGame_Peskoff_Rob.Game.Util {
+﻿namespace GD14_1133_DiceGame_Peskoff_Rob.game.util {
 	internal class Display {
 
 		private static float TYPEWRITER_DEFAULT = 1.0f / 60.0f;
