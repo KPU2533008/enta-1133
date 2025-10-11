@@ -1,6 +1,8 @@
-﻿using GD14_1133_DiceGame_Peskoff_Rob.Game.Util;
+﻿using GD14_1133_DiceGame_Peskoff_Rob.engine.input;
+using GD14_1133_DiceGame_Peskoff_Rob.game.util;
+using System.Numerics;
 
-namespace GD14_1133_DiceGame_Peskoff_Rob.Game.Object {
+namespace GD14_1133_DiceGame_Peskoff_Rob.game.@object {
 	internal class Player {
 
 		private string playerName;
@@ -35,16 +37,14 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.Game.Object {
 		}
 
 		private void ShowAvailableDice() {
-			Display.PrintTypewriter($"\nHere are your available dice:");
-			for ( int i = 0; i < inventory.Count; i++ ) {
-				Display.PrintTypewriter($"\n{i + 1}) {inventory[i].GetDieType()}");
+			string availableDice = $"Here are your available dice:\n(1) {inventory[0].GetDieType()}";
+			for ( int i = 1; i < inventory.Count; i++ ) {
+				availableDice += $", ({i + 1}) {inventory[i].GetDieType()}";
 			}
-			Display.Print("\n");
+			Typewriter.Play(Game.dialogText, availableDice);
 		}
 
 		private int PromptHumanDiceSelection() {
-			int selectedDieNum = -1;
-
 			/*
 			 * Input validation:
 			 * Continually loop, grabbing player input. If they enter something that parses to an int,
@@ -55,31 +55,28 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.Game.Object {
 			 * 
 			 * Once we have a valid input in-hand and a die chosen, break the loop.
 			 */
-			while ( true ) {
-				Display.Print("\n");
-				string input = Console.ReadLine() ?? "";
-				int parsed;
-				bool success = int.TryParse(input, out parsed);
+			UserInputService.GetValidInput((string input, out bool isValid) => {
+				int selectedDieNum = -1;
+				isValid = false;
+
+				bool success = int.TryParse(input, out int parsed);
 
 				if ( success ) {
 					if ( Math.Clamp(parsed, 1, inventory.Count) == parsed ) {
+						isValid = true;
 						selectedDieNum = parsed - 1;
-						break;
 					}
 				} else {
 					for ( int i = 0; i < inventory.Count; i++ ) {
 						if ( inventory[i].GetDieType() == input ) {
+							isValid = true;
 							selectedDieNum = i;
-							break;
 						}
 					}
 				}
 
-				if ( selectedDieNum != -1 )
-					break;
-
-				Display.PrintTypewriter($"\nPlease choose one of your available dice!");
-			}
+				return selectedDieNum;
+			}, out int selectedDieNum);
 
 			return selectedDieNum;
 		}
@@ -94,7 +91,6 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.Game.Object {
 				Random rng = new();
 				selectedDieNum = rng.Next(1, inventory.Count) - 1;
 				Sugar.Wait(1);
-				Display.Print("\n");
 			}
 
 			Dice selectedDie = inventory[selectedDieNum];

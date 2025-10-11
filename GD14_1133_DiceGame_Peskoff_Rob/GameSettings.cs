@@ -1,8 +1,10 @@
 ﻿namespace GD14_1133_DiceGame_Peskoff_Rob {
 	internal class GameSettings {
 
+		internal static readonly string GAME_NAME = "Rob Peskoff's DIRTY DICE";
+
 		// This version no longer has any flavor text
-		internal static Dictionary<string, bool> SETTINGS = new Dictionary<string, bool>() {
+		internal static readonly Dictionary<string, bool> SETTINGS = new Dictionary<string, bool>() {
 			//["FlavorText"] = true,
 			["TypewriterEffect"] = true,
 		};

@@ -1,7 +1,7 @@
-﻿using GD14_1133_DiceGame_Peskoff_Rob.Game.Util;
-using GD14_1133_DiceGame_Peskoff_Rob.Input;
+﻿using GD14_1133_DiceGame_Peskoff_Rob.game.util;
+using GD14_1133_DiceGame_Peskoff_Rob.input;
 
-namespace GD14_1133_DiceGame_Peskoff_Rob.Menu {
+namespace GD14_1133_DiceGame_Peskoff_Rob.menu {
 	internal class MenuManager {
 
 		private IMenu? currentMenu;
