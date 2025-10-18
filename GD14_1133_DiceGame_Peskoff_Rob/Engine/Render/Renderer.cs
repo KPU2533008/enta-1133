@@ -11,7 +11,7 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.engine.render {
 			}
 		}
 
-		private static readonly Vector2 MIN_RESOLUTION = new(100, 33);
+		private static readonly Vector2 MIN_RESOLUTION = new(120, 40);
 		private Canvas? lastCanvas = null;
 
 		public Renderer() {
@@ -44,26 +44,15 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.engine.render {
 			} else {
 				// TODO: Sort by GuiBase2d ZIndex + parent-child hierarchy (child should render on top of parent)
 				foreach ( IDrawable drawable in Scene.GetObjects() ) {
+					if ( !drawable.CanDraw() )
+						continue;
 					drawable.Draw(canvas);
 				}
 			}
 
 			Console.SetCursorPosition(0, 0);
-			Console.Write(canvas.ToString());
+			Console.Write(canvas.GetPixels());
 			lastCanvas = canvas;
-
-			// DISABLED: Attempted to add color support to the renderer but it made everything to slow :(
-
-			//Pixel[,] pixels = canvas.GetPixels();
-			//for ( int row = 0; row < pixels.GetLength(0); row++ ) {
-			//	for ( int col = 0; col < pixels.GetLength(1); col++ ) {
-			//		Pixel px = pixels[row, col];
-			//		Console.BackgroundColor = px.background;
-			//		Console.ForegroundColor = px.foreground;
-			//		Console.Write(px.content.ToString());
-			//	}
-			//	Console.Write("\n");
-			//}
 		}
 
 	}

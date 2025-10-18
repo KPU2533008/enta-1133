@@ -1,5 +1,4 @@
-﻿using GD14_1133_DiceGame_Peskoff_Rob.engine.instance;
-using System.Diagnostics;
+﻿using GD14_1133_DiceGame_Peskoff_Rob.engine.@object;
 
 namespace GD14_1133_DiceGame_Peskoff_Rob.engine.input {
 	internal class UserInputService {

@@ -5,6 +5,9 @@
 		private readonly int numDice;
 		private int lastRoll = -1;
 
+		public bool IsCriticalRoll => lastRoll == numDice * faces;
+		public bool IsCriticalFail => lastRoll == numDice;
+
 		internal Dice(int faces = 6, int numDice = 1) {
 			this.faces = faces;
 			this.numDice = numDice;
@@ -15,11 +18,11 @@
 		}
 
 		internal string GetDieType() {
-			return "d" + faces;
+			return numDice + "d" + faces;
 		}
 
 		internal int Roll() {
-			Random rng = new Random();
+			Random rng = new();
 			int roll = 0;
 
 			for ( int i = 0; i < numDice; i++ ) {

@@ -1,10 +1,8 @@
 ﻿namespace GD14_1133_DiceGame_Peskoff_Rob.engine {
-	internal class Engine {
-
-		public static readonly TaskScheduler RunService = new TaskScheduler();
+	internal static class Engine {
 
 		public static void Run() {
-			RunService.Start();
+			TaskScheduler.Start();
 		}
 
 	}

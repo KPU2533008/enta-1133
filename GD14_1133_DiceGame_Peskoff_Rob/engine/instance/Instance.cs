@@ -69,7 +69,7 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.engine.instance {
 			}
 		}
 
-		public void Destroy() {
+		public virtual void Destroy() {
 			this.Parent = null;
 			ClearAllChildren();
 		}

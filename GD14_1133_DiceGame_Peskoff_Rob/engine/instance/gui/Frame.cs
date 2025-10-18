@@ -6,9 +6,6 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.engine.instance.gui {
 		public bool borderEnabled = false;
 
 		public override void Draw(Canvas canvas) {
-			if ( !visible )
-				return;
-
 			if ( borderEnabled ) {
 				for ( int y = AbsolutePosition.Y; y < AbsolutePosition.Y + AbsoluteSize.Y - 1; y++ ) {
 					canvas.WritePixels(AbsolutePosition.X, y, "║", backgroundColor, backgroundColor, false);

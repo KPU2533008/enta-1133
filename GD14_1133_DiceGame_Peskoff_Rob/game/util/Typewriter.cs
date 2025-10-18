@@ -1,17 +1,18 @@
-﻿using GD14_1133_DiceGame_Peskoff_Rob.engine;
-using GD14_1133_DiceGame_Peskoff_Rob.engine.instance;
-using GD14_1133_DiceGame_Peskoff_Rob.engine.instance.gui;
+﻿using GD14_1133_DiceGame_Peskoff_Rob.engine.instance.gui;
+using GD14_1133_DiceGame_Peskoff_Rob.engine.@object;
+using TaskScheduler = GD14_1133_DiceGame_Peskoff_Rob.engine.TaskScheduler;
 
 namespace GD14_1133_DiceGame_Peskoff_Rob.game.util {
 	internal class Typewriter {
 
-		private static Connection PlayInternal(TextLabel label, string text, int inc = 1) {
+		private static Connection PlayInternal(TextLabel label, string text, int inc = 2) {
 			label.text = text;
 			label.maxVisibleGraphemes = GameSettings.GetSetting("TypewriterEffect") ? 0 : -1;
 
 			Connection conn = null;
-			conn = Engine.RunService.PreRender.Connect((float dt) => {
+			conn = TaskScheduler.PreRender.Connect((float dt) => {
 				if ( !GameSettings.GetSetting("TypewriterEffect") || label.maxVisibleGraphemes >= label.text.Length ) {
+					label.maxVisibleGraphemes = -1;
 					conn?.Disconnect();
 					return;
 				}

@@ -1,25 +1,27 @@
-﻿using GD14_1133_DiceGame_Peskoff_Rob.engine.instance;
-using GD14_1133_DiceGame_Peskoff_Rob.engine.input;
+﻿using GD14_1133_DiceGame_Peskoff_Rob.engine.input;
 using GD14_1133_DiceGame_Peskoff_Rob.engine.render;
+using GD14_1133_DiceGame_Peskoff_Rob.engine.@object;
 
 namespace GD14_1133_DiceGame_Peskoff_Rob.engine {
-	internal class TaskScheduler : ILifecycle {
+	internal static class TaskScheduler {
 
 		public static readonly int FPS_TARGET = 60;
 
-		private Renderer renderer = new();
-		private AsyncTask? engineLoop = null;
+		private static Renderer renderer = new();
+		private static AsyncTask? engineLoop = null;
 
-		private long lastTick = 0;
+		private static long lastTick = 0;
 
-		public Signal<float> PreRender = new();
+		public static Signal<float> PreRender = new();
 
-		private void FrameSleep(float frameLength) {
+		private static List<float> frameLengthLog = new();
+
+		private static void FrameSleep(float frameLength) {
 			float targetFrameTime = 1.0f / FPS_TARGET;
 			Thread.Sleep(Math.Max(0, (int)( targetFrameTime - frameLength )));
 		}
 
-		private AsyncTask StartEngineLoop() {
+		private static AsyncTask StartEngineLoop() {
 			lastTick = DateTime.Now.Ticks;
 			return new((token) => {
 				while ( true ) {
@@ -36,21 +38,34 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.engine {
 					renderer.DrawScreen();
 
 					long frameEnd = DateTime.Now.Ticks;
-					float frameLengthMs = ( frameEnd - frameStart ) / ( TimeSpan.TicksPerMillisecond * 1000.0f );
+					float frameLength = ( frameEnd - frameStart ) / ( TimeSpan.TicksPerMillisecond * 1000.0f );
 					lastTick = frameStart;
 
-					FrameSleep(frameLengthMs);
+					frameLengthLog.Add(frameLength);
+					if ( frameLengthLog.Count > 10 ) {
+						frameLengthLog.RemoveAt(0);
+					}
+
+					FrameSleep(frameLength);
 				}
 			});
 		}
 
-		public void Init() { }
+		public static float GetAvgFrameLength() {
+			float sum = 0.0f;
+			for ( int i = 0; i < frameLengthLog.Count; i++ ) {
+				sum += frameLengthLog[i];
+			}
+			return sum / frameLengthLog.Count;
+		}
 
-		public void Start() {
+		public static void Init() { }
+
+		public static void Start() {
 			engineLoop = StartEngineLoop();
 		}
 
-		public void Stop() {
+		public static void Stop() {
 			engineLoop?.Cancel();
 		}
 

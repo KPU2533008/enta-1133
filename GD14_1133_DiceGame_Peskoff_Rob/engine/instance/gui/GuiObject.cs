@@ -49,7 +49,16 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.engine.instance.gui {
 			Scene.Add(this);
 		}
 
+		public virtual bool CanDraw() {
+			return visible;
+		}
+
 		public abstract void Draw(Canvas canvas);
+
+		public override void Destroy() {
+			Scene.Remove(this);
+			base.Destroy();
+		}
 
 	}
 }

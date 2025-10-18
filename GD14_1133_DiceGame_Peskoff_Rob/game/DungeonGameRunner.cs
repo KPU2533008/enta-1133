@@ -1,110 +1,171 @@
 ﻿using GD14_1133_DiceGame_Peskoff_Rob.engine.input;
+using GD14_1133_DiceGame_Peskoff_Rob.game.combat;
+using GD14_1133_DiceGame_Peskoff_Rob.game.@enum;
+using GD14_1133_DiceGame_Peskoff_Rob.game.item;
+using GD14_1133_DiceGame_Peskoff_Rob.game.item.consumable;
+using GD14_1133_DiceGame_Peskoff_Rob.game.item.weapon.player;
 using GD14_1133_DiceGame_Peskoff_Rob.game.@object;
-using GD14_1133_DiceGame_Peskoff_Rob.game.util;
+using GD14_1133_DiceGame_Peskoff_Rob.game.ui;
+using GD14_1133_DiceGame_Peskoff_Rob.util;
 
 namespace GD14_1133_DiceGame_Peskoff_Rob.game {
 	internal class DungeonGameRunner {
 
 		private Dungeon dungeon;
 		private DungeonRoom currentRoom;
-		private Player player;
+		private DungeonGamePlayer player;
 
-		private bool awaitingAction = false;
-		private bool awaitingMove = false;
-
-		private Dictionary<string, Action> actions;
+		private Dictionary<WorldAction, Action> worldActions;
+		private Dictionary<InventoryAction, Action> inventoryActions;
 
 		public DungeonGameRunner() {
-			actions = new Dictionary<string, Action>() {
-				{ "move", () => {
-					AskForDirection();
-				} },
-				{ "search", () => {
-					currentRoom?.OnSearched();
-					Sugar.Wait(3);
-					AskForAction();
-				} },
+			Random rng = new();
+
+			dungeon = new(new(4, 4));
+			currentRoom = dungeon.GetRandomRoom();
+			player = new();
+
+			Team playerTeam = new([player]);
+
+			Game.dialogWindow.ClearText();
+			Game.dialogWindow.ClearOptions();
+			Game.inventory.Clear();
+
+			player.inventoryChanged.Connect((bool _) => {
+				Game.inventory.UpdateItems(player.GetInventoryItems());
+			});
+
+			worldActions = new() {
+				{WorldAction.Explore, () => {
+					PromptMoveDirection();
+				}},
+
+				{WorldAction.Search, () => {
+					currentRoom?.OnSearched(player);
+					PromptWorldAction();
+				}},
+
+				{WorldAction.ManageItems, () => {
+					PromptInventoryAction();
+				}},
+			};
+
+			inventoryActions = new() {
+				{InventoryAction.Use, () => {
+					if (player.Team == null)
+						return;
+
+					// DO NOT call SelectConsumable() here. That is for COMBAT and will return an item ALWAYS.
+					if (player.PromptSelectItemForUse(typeof(Consumable)) is Consumable item) {
+						Combatant target = player.SelectTarget(player.Team.GetAllegiantMembers(item.TargetAllegiance, item.TargetMortality));
+						player.TakeItem(item);
+						item.OnUse(player, target);
+					}
+
+					PromptInventoryAction();
+				}},
+
+				{InventoryAction.Inspect, () => {
+					Item? item = player.PromptSelectItem(typeof(Item));
+					if (item != null) {
+						Game.dialogWindow.ShowDialog(item.Description);
+					}
+					PromptInventoryAction();
+				}},
+
+				{InventoryAction.Drop, () => {
+					player.PromptDropItem();
+					PromptInventoryAction();
+				}},
+
+				{InventoryAction.Back, () => {
+					PromptWorldAction();
+				}},
 			};
 		}
 
-		private bool GetNextRoom(string dir, out DungeonRoom? room) {
-			if ( dir == "north" ) {
-				room = currentRoom.north;
-			} else if ( dir == "east" ) {
-				room = currentRoom.east;
-			} else if ( dir == "south" ) {
-				room = currentRoom.south;
-			} else if ( dir == "west" ) {
-				room = currentRoom.west;
-			} else {
-				room = null;
-				return false;
+		private void PromptWorldAction() {
+			if ( !player.IsAlive ) {
+				Game.dialogWindow.ShowDialog("You have been defeated in battle.\n\nGAME OVER.", false);
+				return;
 			}
-			return true;
+
+			List<string> options = [];
+			foreach ( WorldAction worldAction in Enum.GetValues(typeof(WorldAction)) ) {
+				options.Add(StringUtil.AddSpaces(worldAction.ToString()));
+			}
+
+			Game.dialogWindow.ShowDialog("[ World ]\nWhat would you like to do?", [.. options]);
+			Game.dialogWindow.optionChosen.Once((int optionNum) => {
+				WorldAction action = (WorldAction)optionNum;
+				Task.Run(() => {
+					worldActions[action]();
+				});
+			});
 		}
 
-		private void AskForAction() {
-			awaitingAction = true;
-			Typewriter.Play(Game.dialogText, "What would you like to do?");
-			Sugar.Wait(0.5f);
-			Typewriter.Play(Game.optionsList, "1) Move rooms (\"move\")\n2) Search current room (\"search\")");
+		private void PromptInventoryAction() {
+			List<string> options = [];
+			foreach ( InventoryAction inventoryAction in Enum.GetValues(typeof(InventoryAction)) ) {
+				options.Add(StringUtil.AddSpaces(inventoryAction.ToString()));
+			}
+
+			Game.dialogWindow.ShowDialog("Inventory Management", [.. options]);
+			Game.dialogWindow.optionChosen.Once((int optionNum) => {
+				InventoryAction action = (InventoryAction)optionNum;
+				Task.Run(() => {
+					inventoryActions[action]();
+				});
+			});
 		}
 
-		private void AskForDirection() {
-			awaitingMove = true;
-			Typewriter.Play(Game.dialogText, "Which direction would you like to go?");
-			Sugar.Wait(0.5f);
-			Typewriter.Play(Game.optionsList, "1) North\n2) South\n3) East\n4) West");
+		private void PromptMoveDirection() {
+			Game.dialogWindow.ShowDialog("In which direction would you like to explore?", ["North", "South", "East", "West"]);
+			Game.dialogWindow.optionChosen.Once((int optionNum) => {
+				Task.Run(() => {
+					DungeonRoom? nextRoom = currentRoom.GetNextRoom((MoveDirection)optionNum);
+
+					if ( nextRoom != null ) {
+						MoveToRoom(nextRoom);
+					} else {
+						Game.dialogWindow.ShowDialog("You look, but there doesn't seem to be another room in this direction.");
+						PromptWorldAction();
+					}
+				});
+			});
 		}
 
 		private void MoveToRoom(DungeonRoom nextRoom) {
-			currentRoom.OnExited();
-			Sugar.Wait(3);
+			currentRoom.OnExited(player);
 			currentRoom = nextRoom;
-			currentRoom.OnEntered();
-			Sugar.Wait(3);
-			AskForAction();
+			currentRoom.OnEntered(player);
+			PromptWorldAction();
 		}
 
 		public void RunGame() {
-			Random rng = new();
+			Game.dialogWindow.ShowDialog("You awake in a strange place you've never seen before. Your head is fuzzy, and you don't remember how you got here.");
+			Game.dialogWindow.ShowDialog("You can't remember your name either, but you think that it's...", false);
 
-			dungeon = new(new(3, 3));
-			currentRoom = dungeon.GetRandomRoom();
-			player = new("Player", false);
+			UserInputService.GetValidInput((string input, out bool isValid) => {
+				isValid = input.Length > 0;
+				return input.Substring(0, Math.Min(input.Length, 8));
+			}, out string playerName);
+			player.SetName(playerName);
 
-			currentRoom.OnEntered();
-			Sugar.Wait(3);
-			AskForAction();
+			CombatantInfoCard playerInfoCard = new(player);
+			playerInfoCard.SetPosition(new(0.5f, -( playerInfoCard.container.AbsoluteSize.X + 2 ) / 2, 1, -4));
 
-			UserInputService.phraseEntered.Connect((string phrase) => {
-				phrase = phrase.ToLower();
+			Game.dialogWindow.ShowDialog($"{player.Name}... You think your name is {player.Name}!");
 
-				if ( awaitingAction ) {
-					if ( actions.ContainsKey(phrase) ) {
-						awaitingAction = false;
-						Game.optionsList.text = "";
-						Task.Run(actions[phrase]);
-					}
-				} else if ( awaitingMove ) {
-					bool validDir = GetNextRoom(phrase, out DungeonRoom? nextRoom);
-					if ( validDir ) {
-						awaitingMove = false;
-						Game.optionsList.text = "";
-						if ( nextRoom != null ) {
-							Task.Run(() => {
-								MoveToRoom(nextRoom);
-							});
-						} else {
-							Task.Run(() => {
-								Typewriter.Play(Game.dialogText, "You look, but there doesn't seem to be another room in this direction.");
-								Sugar.Wait(3.5f);
-								AskForAction();
-							});
-						}
-					}
-				}
-			});
+			player.GiveItem(new RustySword());
+			player.GiveItem(new Bandage());
+			player.GiveItem(new Bandage());
+
+			Game.dialogWindow.ShowDialog($"You feel something strapped to your thigh. Something cold. You look down and see an old and rusty sword hanging loosely from your hip.");
+			Game.dialogWindow.ShowDialog($"You look around, dizzy and dazed, and try to identify your surroundings. You seem to be in some kind of very old dungeon.");
+
+			currentRoom.OnEntered(player);
+			PromptWorldAction();
 		}
 
 	}

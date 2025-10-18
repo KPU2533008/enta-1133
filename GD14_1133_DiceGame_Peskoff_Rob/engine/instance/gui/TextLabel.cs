@@ -13,8 +13,12 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.engine.instance.gui {
 
 		public bool TextFits { get; private set; } = false;
 
+		public override bool CanDraw() {
+			return text.Length > 0 && base.CanDraw();
+		}
+
 		public override void Draw(Canvas canvas) {
-			if ( !visible || text.Length == 0 )
+			if ( text.Length == 0 )
 				return;
 
 			string renderText = text.Replace('\t', ' ');
@@ -94,11 +98,6 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.engine.instance.gui {
 				canvas.WritePixels(x, y, line.Substring(0, length), backgroundColor, textColor, false);
 				graphemesRemaining = Math.Max(graphemesRemaining - length, 0);
 			}
-		}
-
-		new public void Destroy() {
-			Scene.Remove(this);
-			base.Destroy();
 		}
 	}
 }

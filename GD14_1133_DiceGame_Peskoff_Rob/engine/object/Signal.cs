@@ -1,6 +1,6 @@
 ﻿using GD14_1133_DiceGame_Peskoff_Rob.engine.instance.@interface;
 
-namespace GD14_1133_DiceGame_Peskoff_Rob.engine.instance {
+namespace GD14_1133_DiceGame_Peskoff_Rob.engine.@object {
 	internal class Connection {
 
 		private Action disconnectHandler;
@@ -29,12 +29,18 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.engine.instance {
 		}
 
 		public Connection Connect(SignalEventHandler subscriber) {
-			InternalEvent += subscriber;
+			SignalEventHandler asyncWrapper = (T args) => {
+				Task.Run(() => {
+					subscriber(args);
+				});
+			};
+
+			InternalEvent += asyncWrapper;
 			Connection conn = null;
 
 			conn = new(() => {
-				InternalEvent -= subscriber;
-				if ( conn != null ) {
+				InternalEvent -= asyncWrapper;
+				if ( conn != null && connections.Count > 0 && connections.Contains(conn) ) {
 					connections.Remove(conn);
 				}
 			});
@@ -45,7 +51,7 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.engine.instance {
 
 		public Connection Once(SignalEventHandler subscriber) {
 			Connection conn = null;
-			conn = Connect((T args) => {
+			conn = Connect((args) => {
 				subscriber(args);
 				conn?.Disconnect();
 			});
@@ -55,7 +61,7 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.engine.instance {
 		public void Wait() {
 			bool yielding = true;
 
-			Once((T args) => {
+			Once((args) => {
 				yielding = false;
 			});
 
