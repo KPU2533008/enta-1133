@@ -11,13 +11,13 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.game.combat.enemy {
 			 * UseItem - 20%
 			 * Pass - 10%
 			 */
-			if ( roll < 1 ) {
-				return CombatAction.Pass;
-			} else if ( roll < 3 ) {
+			if ( roll < 3 ) {
 				return CombatAction.UseItem;
-			} else {
+			} else if ( Team?.GetAllegiantMembers(Allegiance.Hostile, Mortality.Alive).Length > 0 ) {
 				return CombatAction.Attack;
 			}
+
+			return CombatAction.Pass;
 		}
 
 		public override Combatant SelectTarget(Combatant[] validTargets) {

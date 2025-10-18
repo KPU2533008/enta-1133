@@ -1,4 +1,5 @@
-﻿using GD14_1133_DiceGame_Peskoff_Rob.game.item.consumable;
+﻿using GD14_1133_DiceGame_Peskoff_Rob.game.item;
+using GD14_1133_DiceGame_Peskoff_Rob.game.item.consumable;
 using GD14_1133_DiceGame_Peskoff_Rob.game.item.weapon;
 using GD14_1133_DiceGame_Peskoff_Rob.game.item.weapon.cpu;
 
@@ -18,11 +19,13 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.game.combat.enemy {
 		}
 
 		public override Consumable SelectConsumable() {
-			return new SpoiledRations();
+			Consumable item = new SpoiledRations();
+			return CanUseItem(item) ? item : new PromptCombatActionAgainConsumable();
 		}
 
 		public override Weapon SelectWeapon() {
-			return new ShadowSword();
+			Weapon item = new ShadowSword();
+			return CanUseItem(item) ? item : new PromptCombatActionAgainWeapon();
 		}
 
 	}
