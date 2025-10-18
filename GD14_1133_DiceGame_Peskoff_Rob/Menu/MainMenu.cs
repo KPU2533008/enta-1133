@@ -11,7 +11,7 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.Menu {
 			return "MAIN_MENU";
 		}
 
-		public bool ShouldDisplayMenuName() {
+		public bool ShouldDisplayHeader() {
 			return true;
 		}
 
@@ -19,28 +19,28 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.Menu {
 			return null;
 		}
 
-		public List<IMenuOption> GetMenuOptions(MenuManager menuManager) {
-			List<IMenuOption> inputOptions = new();
+		public List<SMenuOption> GetMenuOptions(MenuManager menuManager) {
+			List<SMenuOption> inputOptions = new();
 
 			inputOptions.Add(new("Play", null, () => {
 				menuManager.GoToMenu(new GameMenu());
-				return true;
+				return new(true);
 			}));
 
 			inputOptions.Add(new("Settings", null, () => {
 				menuManager.GoToMenu(new SettingsMenu());
-				return true;
+				return new(true);
 			}));
 
 			inputOptions.Add(new("Quit", null, () => {
 				Environment.Exit(0);
-				return true;
+				return new(true);
 			}));
 
 			return inputOptions;
 		}
 
-		public void RenderMenu() {
+		public void Draw() {
 			Display.PrintLn("Select an option:");
 		}
 

@@ -1,203 +1,238 @@
 ﻿using GD14_1133_DiceGame_Peskoff_Rob.Game.Object;
 using GD14_1133_DiceGame_Peskoff_Rob.Game.Util;
-using Microsoft.VisualBasic;
-using System.Reflection.Metadata.Ecma335;
 
 namespace GD14_1133_DiceGame_Peskoff_Rob.Game {
 	internal class DiceGameRunner {
 
-		private static string[] badListener = [
-			"WOW, OUR CHALLENGER DIDN'T FOLLOW THE INSTRUCTIONS AT ALL!!! GO AHEAD AND TRY THAT AGAIN FOR ME...!!!",
-			"OUR NEWEST CHALLENGER NEEDS TO GET THEIR EARS CHECKED, BECAUSE THEY HAVE TROUBLE LISTENING...!!!",
-			"IT MUST BE OPPOSITE DAY BECAUSE OUR CHALLENGER DID THE POLAR OPPOSITE OF WHAT THEY WERE ASKED!! LET'S TRY IT AGAIN...!",
-			"*ALREADY* OUR CHALLENGER IS USING MIND GAMES TO TRY AND THROW OFF THE COMPETITION!!! BUT I NEED YOU TO FOLLOW INSTRUCTIONS, SO GIVE IT ANOTHER SHOT!!!"
-		];
+		private List<Player> players = new List<Player>();
+		private List<Player> finalRanking = new List<Player>();
 
-		internal void ShowIntroText(string playerName) {
-			Sugar.Wait(0.3f);
-			Display.PrintTypewriter($"\nEVERYONE PLEASE WELCOME OUR NEWEST CHALLENGER");
-			Display.PrintTypewriter("...", 1);
-			Display.PrintTypewriter($" {playerName}", 1.0f / 120);
-			Display.PrintTypewriter("!!!!!!!!!!!!!!!!", 0.1f);
+		// This is a bit funky but it's better than checking each of these individually each time
+		private string[] ALLOWED_CONFIRM_STRINGS = ["yes", "confirm", "true", "y"];
+		private string[] ALLOWED_REJECT_STRINGS = ["no", "reject", "false", "n"];
 
-			if ( GameSettings.FLAVOR_TEXT_ENABLED ) {
+		internal void ShowRules() {
+			bool doShowRules = false;
+
+			while ( true ) {
+				Display.PrintTypewriter("\nWould you like to see the rules? (y/n)\n");
+				string showRulesInput = ( Console.ReadLine() ?? "" ).ToLower();
+				if ( ALLOWED_CONFIRM_STRINGS.Contains(showRulesInput) || ALLOWED_REJECT_STRINGS.Contains(showRulesInput) ) {
+					doShowRules = ALLOWED_CONFIRM_STRINGS.Contains(showRulesInput);
+					break;
+				}
+			}
+
+			if ( doShowRules ) {
+				Display.PrintLn();
+				Display.PrintHeader(2, "Rules");
+				Display.PrintTypewriter("\nEvery player begins the game with a collection of dice with different numbers of faces.");
+				Display.PrintTypewriter("\n\nEach round, every player chooses one of their dice to roll. The player who rolls the");
+				Display.PrintTypewriter("\nhighest number wins the round and keeps all dice thrown that round except for their");
+				Display.PrintTypewriter("\nown die, which is thrown away.");
+				Display.PrintTypewriter("\n\nWhen a player runs out of dice, they are eliminated from the game.");
+				Display.PrintTypewriter("\nThe game continues until only one player remains. That player is the winner!");
+				Sugar.Wait(3);
+				Display.PrintTypewriter("\n\nPress enter to begin the game...");
+				Console.ReadLine();
+			}
+		}
+
+		private bool RegisterPlayers() {
+			int numPlayers = -1;
+
+			while ( true ) {
+				Display.PrintTypewriterLn("\nHow many players will play this game? (including non-human players)");
+				string input = Console.ReadLine() ?? "";
+				bool success = int.TryParse(input, out int parsed);
+
+				if ( success ) {
+					if ( parsed > 1 && parsed <= 4 ) {
+						numPlayers = parsed;
+						break;
+					} else {
+						Display.PrintTypewriter("This game only supports 2 - 4 players!\n");
+					}
+				} else {
+					Display.PrintTypewriter("Please enter a valid number!\n");
+				}
+
+				Sugar.Wait(0.5f);
+			}
+
+			for ( int i = 0; i < numPlayers; i++ ) {
+				Display.PrintTypewriter($"\nPlease enter player {i + 1}'s details:");
+				Display.PrintTypewriter("\nName (max 7 chars): ");
+
+				string nameInput = Console.ReadLine() ?? "";
+				string name = nameInput == "" ? $"Player{i + 1}" : nameInput;
+
+				if ( name.Length > 7 ) {
+					name = name.Substring(0, 7);
+				}
+
+				bool isCpu = false;
+
+				while ( true ) {
+					Display.PrintTypewriter("Is CPU (y/n): ");
+					string isHumanInput = ( Console.ReadLine() ?? "" ).ToLower();
+					if ( ALLOWED_CONFIRM_STRINGS.Contains(isHumanInput) || ALLOWED_REJECT_STRINGS.Contains(isHumanInput) ) {
+						isCpu = ALLOWED_CONFIRM_STRINGS.Contains(isHumanInput);
+						break;
+					}
+				}
+
+				players.Add(new Player(name, isCpu));
+			}
+
+			// TODO [STRETCH]: Ask if all players look correct or if they'd like to start again
+
+			return true;
+		}
+
+		private Dice PromptPlayerDieSelection(Player player) {
+			Sugar.Wait(0.5f);
+
+			Dice chosenDie = player.SelectDieForTurn();
+			Display.PrintTypewriter($"\n{player.ToString()} has chosen their {chosenDie.GetDieType()}!");
+
+			return chosenDie;
+		}
+
+		private List<Player> GetRemainingPlayers() {
+			List<Player> remainingPlayers = new List<Player>();
+			foreach ( Player player in players ) {
+				if ( !player.IsEliminated() ) {
+					remainingPlayers.Add(player);
+				}
+			}
+			return remainingPlayers;
+		}
+
+		private void RunSingleRound(int roundNum) {
+			Display.Print("\n\n");
+			Display.PrintHeader(2, $"ROUND {roundNum}");
+
+			List<Player> remainingPlayers = GetRemainingPlayers();
+			Dictionary<Player, Dice> rolledDice = new();
+
+			for ( int i = 0; i < remainingPlayers.Count; i++ ) {
+				Player player = remainingPlayers[i];
+				Display.PrintLn();
+				Display.PrintHeader(3, $"{player.ToString()}'s Turn");
+				Display.PrintTypewriter($"\n{player.ToString()}, you're up! Choose a die to throw this round!");
+				Dice chosenDice = PromptPlayerDieSelection(player);
+
 				Sugar.Wait(1);
-				Display.PrintTypewriter($"\nTODAY, ON THIS BEAUTIFUL {Strings.UCase(DateTime.Now.ToString("MMMM"))} DAY, YOU'LL BE GOING HEAD TO HEAD AGAINST OUR REIGNING CHAMP");
-				Display.PrintTypewriter("...", 1);
+				Display.PrintTypewriter("\nAlright, let's roll that die!");
 				Sugar.Wait(1);
-				Display.PrintTypewriter("\n\nCHRISTINA PERSEPHONE UMBELTON OF THE APOSTLES OF MAGIC DICE");
-				Display.PrintTypewriter("!!!!!!!", 0.1f);
+				Display.PrintTypewriter("\nAnd the result is...");
+				Sugar.Wait(2);
+				chosenDice.Roll();
+				rolledDice.Add(player, chosenDice);
+				player.totalRoll += chosenDice.GetLastRoll();
+				Display.PrintTypewriter($"\n{rolledDice[player].GetLastRoll()}!");
 				Sugar.Wait(1);
-				Display.PrintTypewriter("\n\nAKA...");
-				Sugar.Wait(1);
-				Display.PrintTypewriter("\n\nTHE NOTORIOUS", 1.0f / 120);
-				Sugar.Wait(1);
-				Display.PrintTypewriter("\nCPU", 1, true);
-				Display.Print(" OF ");
-				Sugar.Wait(1);
-				Display.PrintTypewriter("AMD", 1, false);
-				Display.PrintTypewriter("!!!!!!!", 0.1f);
+				Display.PrintLn();
+			}
+
+			KeyValuePair<Player, int> highestRoll = KeyValuePair.Create(remainingPlayers[0], rolledDice[remainingPlayers[0]].GetLastRoll());
+
+			foreach ( KeyValuePair<Player, Dice> rolledDie in rolledDice ) {
+				if ( rolledDie.Key == highestRoll.Key )
+					continue;
+
+				int dieRoll = rolledDie.Value.GetLastRoll();
+
+				if ( dieRoll > highestRoll.Value ) {
+					highestRoll = KeyValuePair.Create(rolledDie.Key, dieRoll);
+				}
+			}
+
+			Display.PrintTypewriter($"\n{highestRoll.Key.ToString()} wins Round {roundNum} and collects all other players' dice!");
+			foreach ( KeyValuePair<Player, Dice> rolledDie in rolledDice ) {
+				if ( rolledDie.Key == highestRoll.Key )
+					continue;
+				highestRoll.Key.AddDice(rolledDie.Value);
+			}
+
+			for ( int i = 0; i < remainingPlayers.Count; i++ ) {
+				Player player = remainingPlayers[i];
+
+				if ( player == highestRoll.Key ) {
+					player.roundsWon++;
+				} else {
+					player.roundsLost++;
+				}
+
+				if ( player.IsEliminated() ) {
+					finalRanking.Add(player);
+					Display.PrintTypewriter($"\n\n{player.ToString().ToUpper()}, YOU ARE OUT OF DICE! You have been ELIMINATED!");
+					Sugar.Wait(1);
+				}
 			}
 
 			Sugar.Wait(2);
 		}
 
-		internal string PromptCoinFaceCall(string playerName) {
-			Random rng = new();
-			string coinCall = "";
-
-			Display.PrintTypewriter("\n\nBUT FIRST, LET'S DECIDE TURN ORDER WITH A COIN FLIP!!!");
-			Sugar.Wait(1);
-			Display.PrintTypewriter($"\n{playerName}, GO AHEAD AND CALL HEADS OR TAILS!!!\n");
+		private void RunGameLoop() {
+			Display.PrintTypewriter("\nLet's begin!");
 			Sugar.Wait(1);
 
-			while ( true ) {
-				string? input = Console.ReadLine();
-				Display.PrintLn("");
-				coinCall = Strings.LCase(input ?? "");
+			int roundNum = 1;
 
-				if ( coinCall == "heads" || coinCall == "tails" ) {
-					break;
-				}
-
-				Display.PrintTypewriter($"{badListener[rng.Next(0, badListener.Length)]}", 1.0f / 120);
-				Sugar.Wait(1);
-				Display.PrintTypewriter($"\n{playerName}, GO AHEAD AND CALL HEADS OR TAILS!!!\n");
+			while ( GetRemainingPlayers().Count > 1 ) {
+				RunSingleRound(roundNum);
+				roundNum++;
 			}
 
-			return coinCall;
+			List<Player> remainingPlayers = GetRemainingPlayers();
+			Player winner = remainingPlayers[0];
+
+			Display.PrintTypewriter($"\n\nAfter {roundNum} rounds, we have a winner!");
+			Sugar.Wait(1);
+			Display.PrintTypewriter("\nAnd our winner is...");
+			Sugar.Wait(1);
+			Display.PrintTypewriter($"\n{winner.ToString().ToUpper()}!!!");
+			finalRanking.Add(winner);
 		}
 
-		internal Dice PromptPlayerDieSelection(Player player) {
-			Sugar.Wait(0.5f);
+		private void ShowFinalGameStats() {
+			Display.PrintLn();
+			Display.PrintHeader(2, "Final Stats");
+			Display.PrintTypewriter("\nHere are your final game stats:");
 
-			int chosenDieNum = -1;
+			Display.Print("\n\nPLAYER\t\tWINS\t\tLOSSES\t\tTOTAL ROLL\t\tAVG. ROLL\t\tDICE COLLECTED");
 
-			if ( player.isHuman ) {
-				Display.PrintTypewriter($"\nHERE ARE YOUR AVAILABLE DICE:");
-				for ( int i = 0; i < player.dice.Count; i++ ) {
-					Display.PrintTypewriter($"\n{i + 1}) {player.dice[i].GetDieType()}");
-				}
-
-				/*
-				 * Input validation:
-				 * Continually loop, grabbing player input. If they enter something that parses to an int,
-				 * check to make sure that there's actually a die in that position in the list. For example,
-				 * if they enter -1, we shouldn't accept that even though it's a valid int. Conversely, if
-				 * their input doesn't parse to int, run through all the dice in their list of available dice
-				 * and see if what they entered matches that die's type. If it does, we'll select that die.
-				 * 
-				 * Once we have a valid input in-hand and a die chosen, break the loop.
-				 */
-				while ( true ) {
-					Display.Print("\n");
-					string input = Console.ReadLine() ?? "";
-					int parsed;
-					bool success = int.TryParse(input, out parsed);
-
-					if ( success ) {
-						if ( Math.Clamp(chosenDieNum, 1, player.dice.Count) == chosenDieNum ) {
-							chosenDieNum = parsed - 1;
-							break;
-						}
-					} else {
-						for ( int i = 0; i < player.dice.Count; i++ ) {
-							if ( player.dice[i].GetDieType() == input ) {
-								chosenDieNum = i;
-								break;
-							}
-						}
-					}
-
-					if ( chosenDieNum != -1 )
-						break;
-
-					Display.PrintTypewriter($"\nPLEASE CHOOSE ONE OF THE DICE ABOVE!");
-				}
-			} else {
-				Sugar.Wait(1);
-				Random rng = new();
-				chosenDieNum = rng.Next(0, player.dice.Count);
-				Display.Print("\n");
+			for ( int i = finalRanking.Count - 1; i >= 0; i-- ) {
+				Player player = finalRanking[i];
+				string playerStats = $"\n{( finalRanking.Count - i )}) {player.ToString()}\t\t{player.roundsWon}\t\t{player.roundsLost}\t\t{player.totalRoll}\t\t{player.totalRoll / ( player.roundsWon + player.roundsLost )}\t\t{player.totalDiceCollected}";
+				Display.Print(playerStats);
 			}
-
-			Dice chosenDie = player.dice[chosenDieNum];
-			player.dice.RemoveAt(chosenDieNum);
-			Display.PrintTypewriter($"\n{player.ToString().ToUpper()} HAS CHOSEN THEIR {chosenDie.GetDieType().ToUpper()}!!!!!");
-
-			return chosenDie;
 		}
 
 		internal void RunGame() {
-			Display.PrintTypewriter("\nWELCOME TO THE DICE GAME!!!");
-			Sugar.Wait(1);
-			Display.Print("\n\n");
-
-			Random rng = new();
-			Player player1 = new();
-			Player player2 = new("CPU");
-			List<Player> playerTurnOrder = [];
-
-			string uppercaseP1 = Strings.UCase(player1.ToString());
-
-			ShowIntroText(uppercaseP1);
-			string coinCall = PromptCoinFaceCall(uppercaseP1);
-
-			Display.PrintTypewriter($"THANKS YOU VERY MUCH!!! OUR CHALLENGER HAS CALLED {Strings.UCase(coinCall)}!!! LET'S FLIP THAT COIN!!!");
-			Sugar.Wait(1);
-			Display.PrintTypewriter("\nAND THE RESULT IS...");
-
-			Sugar.Wait(1);
-			string coinFlipResult = rng.Next(0, 2) == 0 ? "heads" : "tails";
-			Display.PrintTypewriter($"\n\n{Strings.UCase(coinFlipResult)}!!!");
-			Sugar.Wait(1.25f);
-
-			if ( coinFlipResult == coinCall ) {
-				Display.PrintTypewriter("\n\nCONGRATULATIONS CHALLENGER, YOU GET TO GO FIRST!!!");
-				playerTurnOrder.Add(player1);
-				playerTurnOrder.Add(player2);
-			} else {
-				Display.PrintTypewriter("\n\nOUCH... TOO BAD CHALLENGER, LOOKS LIKE THE REIGNING CHAMP IS UP FIRST!!!");
-				playerTurnOrder.Add(player2);
-				playerTurnOrder.Add(player1);
-			}
+			Console.WriteLine("");
+			Display.PrintTypewriterLn("Welcome to DIRTY DICE!\n");
 
 			Sugar.Wait(1);
 
-			// TODO: Put this all into a loop
-			Dictionary<Player, int> rolls = new();
+			Display.PrintHeader(2, "Game Setup");
+			RegisterPlayers();
+			Sugar.Wait(1);
 
-			for ( int i = 0; i < playerTurnOrder.Count; i++ ) {
-				Player player = playerTurnOrder[i];
-				Display.PrintTypewriter($"\n\n{player.ToString().ToUpper()}, IT'S YOUR ROLL! CHOOSE A DIE TO THROW!");
-				Dice chosenDice = PromptPlayerDieSelection(player);
+			ShowRules();
 
-				Sugar.Wait(1);
-				Display.PrintTypewriter("\nALRIGHT, LET'S ROLL THAT DIE!!!!");
-				Sugar.Wait(1);
-				Display.PrintTypewriter("\nAND THE RESULT IS...");
-				Sugar.Wait(1);
-				rolls.Add(player, chosenDice.Roll());
-				Display.PrintTypewriter($"\n\n{rolls[player]}!!!!!!!");
-				Sugar.Wait(1);
-			}
+			RunGameLoop();
 
-			// Highest roll is automatically assigned to the player who won the coin toss.
-			// We do this so that in the case of a tie, the coin toss winner wins the round.
-			KeyValuePair<Player, int> highestRoll = KeyValuePair.Create(playerTurnOrder[0], rolls[playerTurnOrder[0]]);
+			Sugar.Wait(2);
 
-			foreach ( KeyValuePair<Player, int> roll in rolls ) {
-				if ( roll.Key == highestRoll.Key )
-					continue;
+			ShowFinalGameStats();
 
-				if ( roll.Value > highestRoll.Value ) {
-					highestRoll = roll;
-				} else if ( roll.Value == highestRoll.Value ) {
-					Display.PrintTypewriter($"\n\nIT APPEARS AS THOUGH THERE IS A TIE... THEREFORE THIS ROUND GOES TO THE WINNER OF THE COIN TOSS...");
-				}
-			}
+			Sugar.Wait(1);
 
-			Display.PrintTypewriter($"\nTHE WINNER IS... {highestRoll.Key}!!!!!!!");
+			Display.PrintTypewriter("\n\nPress enter to return to the main menu...\n");
+			Console.ReadLine();
 		}
 
 	}

@@ -2,10 +2,10 @@
 	internal interface IMenu {
 
 		internal string GetMenuId();
-		internal bool ShouldDisplayMenuName();
+		internal bool ShouldDisplayHeader();
 		internal IMenu? GetPreviousMenu();
-		internal List<IMenuOption> GetMenuOptions(MenuManager menuManager);
-		internal void RenderMenu();
+		internal List<SMenuOption> GetMenuOptions(MenuManager menuManager);
+		internal void Draw();
 
 	}
 }
