@@ -60,7 +60,7 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.game.combat {
 				if ( enemies.Length == 1 ) {
 					infoCard.SetPosition(new(0.5f, offset, 0.4f, 0));
 				} else if ( enemies.Length == 2 ) {
-					infoCard.SetPosition(new(0.5f, offset + ( i == 0 ? 20 : -20 ), 0.4f, 0));
+					infoCard.SetPosition(new(0.5f, offset + ( i == 0 ? -20 : 20 ), 0.4f, 0));
 				} else if ( enemies.Length == 3 ) {
 					infoCard.SetPosition(new(0.5f, offset + ( i == 1 ? 0 : i == 0 ? -32 : 32 ), 0.4f, 0));
 				}
