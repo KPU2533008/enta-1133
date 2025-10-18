@@ -144,7 +144,7 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.game {
 
 		public void RunGame() {
 			Game.dialogWindow.ShowDialog("You awake in a strange place you've never seen before. Your head is fuzzy, and you don't remember how you got here.");
-			Game.dialogWindow.ShowDialog("You can't remember your name either, but you think that it's...", false);
+			Game.dialogWindow.ShowDialog("You can't remember your name either, but you think that it's...\n(TYPE YOUR NAME)", false);
 
 			UserInputService.GetValidInput((string input, out bool isValid) => {
 				isValid = input.Length > 0;
