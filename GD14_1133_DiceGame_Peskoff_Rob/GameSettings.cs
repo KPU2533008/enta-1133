@@ -1,7 +1,7 @@
 ﻿namespace GD14_1133_DiceGame_Peskoff_Rob {
 	internal class GameSettings {
 
-		internal static readonly string GAME_NAME = "Rob Peskoff's DIRTY DICE";
+		internal const string GAME_NAME = "Rob Peskoff's Dungeons & Dinguses";
 
 		// This version no longer has any flavor text
 		internal static readonly Dictionary<string, bool> SETTINGS = new Dictionary<string, bool>() {
