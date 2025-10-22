@@ -1,7 +1,7 @@
-﻿using GD14_1133_DiceGame_Peskoff_Rob.Game.Util;
-using GD14_1133_DiceGame_Peskoff_Rob.Util;
+﻿using GD14_1133_DiceGame_Peskoff_Rob.game.util;
+using GD14_1133_DiceGame_Peskoff_Rob.util;
 
-namespace GD14_1133_DiceGame_Peskoff_Rob.Menu {
+namespace GD14_1133_DiceGame_Peskoff_Rob.menu {
 	internal class SettingsMenu : IMenu {
 
 		public override string ToString() {

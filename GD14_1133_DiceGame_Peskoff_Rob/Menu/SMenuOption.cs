@@ -1,4 +1,4 @@
-﻿namespace GD14_1133_DiceGame_Peskoff_Rob.Menu {
+﻿namespace GD14_1133_DiceGame_Peskoff_Rob.menu {
 	internal struct SMenuOption {
 
 		public string name;
