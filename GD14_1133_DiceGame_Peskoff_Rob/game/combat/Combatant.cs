@@ -7,6 +7,7 @@ using GD14_1133_DiceGame_Peskoff_Rob.game.item.weapon;
 namespace GD14_1133_DiceGame_Peskoff_Rob.game.combat {
 	internal abstract class Combatant : LivingEntity {
 
+		public char Suffix { get; set; } = ' ';
 		public Team? Team { get; private set; }
 
 		public abstract CombatAction SelectCombatAction();
@@ -19,6 +20,10 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.game.combat {
 
 		public Combatant(int maxHp) : base(maxHp) {
 			Name = "Combatant";
+		}
+
+		public string GetFullName() {
+			return Name + ( Suffix == ' ' ? "" : $" {Suffix}" );
 		}
 
 		public bool CanAct() {

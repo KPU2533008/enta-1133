@@ -8,16 +8,18 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.game.item.weapon {
 
 		protected void BasicAttack(Combatant aggressor, Combatant victim) {
 			int damage = Roll();
+			string aggressorName = aggressor.GetFullName();
+			string victimName = victim.GetFullName();
 
-			Game.dialogWindow.ShowDialog($"{aggressor.Name} attacks {victim.Name} with {Name}!");
+			Game.dialogWindow.ShowDialog($"{aggressorName} attacks {victimName} with {Name}!");
 			victim.TakeDamage(damage);
 
 			if ( dice.IsCriticalRoll ) {
-				Game.dialogWindow.ShowDialog($"CRITICAL STRIKE! {criticalRollFlavorText} and {victim.Name} receives {damage} HP of damage!");
+				Game.dialogWindow.ShowDialog($"CRITICAL STRIKE! {criticalRollFlavorText} and {victimName} receives {damage} HP of damage!");
 			} else if ( dice.IsCriticalFail ) {
-				Game.dialogWindow.ShowDialog($"CRITICAL FAIL! {victim.Name} evades the attack with finesse and grace and receives only {damage} HP of damage!");
+				Game.dialogWindow.ShowDialog($"CRITICAL FAIL! {victimName} evades the attack with finesse and grace and receives only {damage} HP of damage!");
 			} else {
-				Game.dialogWindow.ShowDialog($"{victim.Name} receives {damage} HP of damage!");
+				Game.dialogWindow.ShowDialog($"{victimName} receives {damage} HP of damage!");
 			}
 		}
 

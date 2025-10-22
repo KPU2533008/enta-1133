@@ -107,9 +107,10 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.game.combat {
 					 * Yay game development! Trains are just hats.
 					 */
 					Item? chosenItem = null;
+					CombatAction combatantAction;
 
 					do {
-						CombatAction combatantAction = combatant.SelectCombatAction();
+						combatantAction = combatant.SelectCombatAction();
 						chosenItem = null;
 
 						if ( combatantAction == CombatAction.Attack ) {
@@ -118,7 +119,7 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.game.combat {
 							chosenItem = combatant.SelectConsumable();
 						} else if ( combatantAction == CombatAction.Flee ) {
 							// TODO: Make this actually do something
-							Game.dialogWindow.ShowDialog($"{combatant.Name} tries to flee from the battle...\n\n...but can't!");
+							Game.dialogWindow.ShowDialog($"{combatant.GetFullName()} tries to flee from the battle...\n\n...but can't!");
 						}
 					} while ( chosenItem != null && ( chosenItem.GetType() == typeof(PromptCombatActionAgainWeapon) || chosenItem.GetType() == typeof(PromptCombatActionAgainConsumable) ) );
 
@@ -132,7 +133,7 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.game.combat {
 						if ( !target.IsAlive && wasTargetAlive ) {
 							Game.dialogWindow.ShowDialog(target.GetDefeatMessage());
 						}
-					} else {
+					} else if ( combatantAction == CombatAction.Pass ) {
 						Game.dialogWindow.ShowDialog(combatant.GetPassMessage());
 					}
 				}

@@ -11,11 +11,11 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.game.combat.enemy {
 		}
 
 		public override string GetDefeatMessage() {
-			return $"{Name} disappeared!";
+			return $"{GetFullName()} disappeared!";
 		}
 
 		public override string GetPassMessage() {
-			return $"{Name} is floating around ominously.";
+			return $"{GetFullName()} is floating around ominously.";
 		}
 
 		public override Consumable SelectConsumable() {

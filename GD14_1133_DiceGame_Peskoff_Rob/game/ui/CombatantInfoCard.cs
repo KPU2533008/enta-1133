@@ -13,7 +13,7 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.game.ui {
 
 		private Connection updateHealthConn;
 
-		public CombatantInfoCard(Combatant combatant) : base(new(), UDim2.FromOffset(24, 3), combatant.Name) {
+		public CombatantInfoCard(Combatant combatant) : base(new(), UDim2.FromOffset(24, 3), combatant.GetFullName()) {
 			main.Parent = Game.mainViewport;
 
 			hpLabel.size = new(0, 2, 0, 1);

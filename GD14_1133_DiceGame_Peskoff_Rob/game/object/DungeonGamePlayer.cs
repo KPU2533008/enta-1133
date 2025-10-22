@@ -38,7 +38,7 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.game.@object {
 			Item? chosenItem = null;
 
 			while ( true ) {
-				Game.dialogWindow.ShowDialog($"Type the name of {itemNameString}, or \"back\" if you've changed your mind.", false);
+				Game.dialogWindow.ShowDialog($"Type the name of {itemNameString} (or its #), or \"back\" if you've changed your mind.", false);
 				UserInputService.GetValidInput((string input, out bool isValid) => {
 					if ( input.Equals("back", StringComparison.CurrentCultureIgnoreCase) ) {
 						isValid = true;
@@ -46,10 +46,16 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.game.@object {
 					}
 
 					Item? chosenItem = null;
+					bool isInt = int.TryParse(input, out int itemIdx);
+					itemIdx--;
 
-					foreach ( Item item in inventory ) {
-						if ( item.Name.Equals(input, StringComparison.CurrentCultureIgnoreCase) )
-							chosenItem = item;
+					if ( isInt && Math.Clamp(itemIdx, 0, inventory.Count - 1) == itemIdx ) {
+						chosenItem = inventory[itemIdx];
+					} else {
+						foreach ( Item item in inventory ) {
+							if ( input.Equals(item.Name, StringComparison.CurrentCultureIgnoreCase) )
+								chosenItem = item;
+						}
 					}
 
 					isValid = chosenItem != null;
@@ -155,11 +161,11 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.game.@object {
 		}
 
 		public override string GetDefeatMessage() {
-			return $"{Name} sustains fatal injuries and meets their demise...";
+			return $"{GetFullName()} sustains fatal injuries and meets their demise...";
 		}
 
 		public override string GetPassMessage() {
-			return $"{Name} passes up their turn and bides their time.";
+			return $"{GetFullName()} passes up their turn and bides their time.";
 		}
 
 		public override CombatAction SelectCombatAction() {
@@ -170,7 +176,7 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.game.@object {
 				options.Add(StringUtil.AddSpaces(action.ToString()));
 			}
 
-			Game.dialogWindow.ShowDialog($"{Name}, choose an action to take this turn!", [.. options]);
+			Game.dialogWindow.ShowDialog($"{GetFullName()}, choose an action to take this turn!", [.. options]);
 			Game.dialogWindow.optionChosen.Once((int optionNum) => {
 				chosenAction = (CombatAction)optionNum;
 			});
@@ -198,7 +204,7 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.game.@object {
 			List<string> options = [];
 
 			foreach ( Combatant target in validTargets ) {
-				options.Add(target.Name);
+				options.Add(target.GetFullName());
 			}
 
 			int chosenTargetNum = 0;

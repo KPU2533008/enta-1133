@@ -11,11 +11,11 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.game.combat.enemy {
 		}
 
 		public override string GetDefeatMessage() {
-			return $"{Name}'s armor shattered to pieces!";
+			return $"{GetFullName()}'s armor shattered to pieces!";
 		}
 
 		public override string GetPassMessage() {
-			return $"{Name} admires their sword as it glistens in the light.";
+			return $"{GetFullName()} admires their sword as it glistens in the light.";
 		}
 
 		public override Consumable SelectConsumable() {

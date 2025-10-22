@@ -14,7 +14,7 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.game.item.consumable {
 			int damage = Roll();
 			target.TakeDamage(damage);
 
-			Game.dialogWindow.ShowDialog($"{target.Name} takes {damage} HP of damage!");
+			Game.dialogWindow.ShowDialog($"{target.GetFullName()} takes {damage} HP of damage!");
 		}
 
 	}

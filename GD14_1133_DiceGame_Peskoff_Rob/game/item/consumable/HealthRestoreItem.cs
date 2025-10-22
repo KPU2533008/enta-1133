@@ -14,7 +14,7 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.game.item.consumable {
 			int health = Roll();
 			target.Heal(health);
 
-			Game.dialogWindow.ShowDialog($"{target.Name} is healed for {health} HP!");
+			Game.dialogWindow.ShowDialog($"{target.GetFullName()} is healed for {health} HP!");
 		}
 
 	}
