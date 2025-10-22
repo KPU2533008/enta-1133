@@ -22,7 +22,6 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.engine.@object {
 	internal class Signal<T> : IDestroyable {
 		public delegate void SignalEventHandler(T args);
 		private event SignalEventHandler InternalEvent;
-		private List<Connection> connections = new();
 
 		public void Fire(T args) {
 			InternalEvent?.Invoke(args);
@@ -40,12 +39,8 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.engine.@object {
 
 			conn = new(() => {
 				InternalEvent -= asyncWrapper;
-				if ( conn != null && connections.Count > 0 && connections.Contains(conn) ) {
-					connections.Remove(conn);
-				}
 			});
 
-			connections.Add(conn);
 			return conn;
 		}
 
@@ -71,8 +66,8 @@ namespace GD14_1133_DiceGame_Peskoff_Rob.engine.@object {
 		}
 
 		public void DisconnectAll() {
-			for ( int i = 0; i < connections.Count; i++ ) {
-				connections[i].Disconnect();
+			foreach ( SignalEventHandler connection in InternalEvent.GetInvocationList().Cast<SignalEventHandler>() ) {
+				InternalEvent -= connection;
 			}
 		}
 
