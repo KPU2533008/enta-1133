@@ -1,7 +1,7 @@
 ﻿using GD14_1133_DiceGame_Peskoff_Rob.engine.instance.@interface;
 
 namespace GD14_1133_DiceGame_Peskoff_Rob.engine.instance {
-	internal abstract class Instance : IDestroyable {
+	public abstract class Instance : IDestroyable {
 
 		private string _className = "Instance";
 		private List<Instance> _children = new();

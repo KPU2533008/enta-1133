@@ -2,7 +2,7 @@
 using GD14_1133_DiceGame_Peskoff_Rob.game.@object;
 
 namespace GD14_1133_DiceGame_Peskoff_Rob.game.item.consumable {
-	internal abstract class Consumable(Dice dice) : Item(dice) {
+	public abstract class Consumable(Dice dice) : Item(dice) {
 
 		protected string usageText = "@USER uses a @ITEM on @TARGET!";
 

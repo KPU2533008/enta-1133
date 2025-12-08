@@ -2,7 +2,7 @@
 using GD14_1133_DiceGame_Peskoff_Rob.engine.render;
 
 namespace GD14_1133_DiceGame_Peskoff_Rob.engine.instance.gui {
-	internal abstract class LayerCollector : GuiBase2d {
+	public abstract class LayerCollector : GuiBase2d {
 
 		public override Vector2 AbsolutePosition {
 			get {

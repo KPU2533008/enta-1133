@@ -2,7 +2,7 @@
 using GD14_1133_DiceGame_Peskoff_Rob.engine.render;
 
 namespace GD14_1133_DiceGame_Peskoff_Rob.engine.instance.gui {
-	internal abstract class GuiObject : GuiBase2d, IDrawable {
+	public abstract class GuiObject : GuiBase2d, IDrawable {
 
 		public ConsoleColor backgroundColor = ConsoleColor.Black; // UNUSED, COLOR NOT SUPPORTED
 		public UDim2 position = new();

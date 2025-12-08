@@ -2,7 +2,7 @@
 using GD14_1133_DiceGame_Peskoff_Rob.game.util;
 
 namespace GD14_1133_DiceGame_Peskoff_Rob.game.@object {
-	internal abstract class DungeonRoom {
+	public abstract class DungeonRoom {
 
 		protected bool isVisited = false;
 		public DungeonRoom? north = null;

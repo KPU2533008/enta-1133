@@ -2,7 +2,7 @@
 using GD14_1133_DiceGame_Peskoff_Rob.game.@object;
 
 namespace GD14_1133_DiceGame_Peskoff_Rob.game.item.weapon {
-	internal abstract class Weapon(Dice dice) : Item(dice) {
+	public abstract class Weapon(Dice dice) : Item(dice) {
 
 		protected string criticalRollFlavorText = "The attack lands with expert precision";
 

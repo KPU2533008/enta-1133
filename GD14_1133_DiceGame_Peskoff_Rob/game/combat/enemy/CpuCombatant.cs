@@ -1,7 +1,7 @@
 ﻿using GD14_1133_DiceGame_Peskoff_Rob.game.@enum;
 
 namespace GD14_1133_DiceGame_Peskoff_Rob.game.combat.enemy {
-	internal abstract class CpuCombatant(int maxHp) : Combatant(maxHp) {
+	public abstract class CpuCombatant(int maxHp) : Combatant(maxHp) {
 		public override CombatAction SelectCombatAction() {
 			Random rng = new();
 			int roll = rng.Next(0, 10);

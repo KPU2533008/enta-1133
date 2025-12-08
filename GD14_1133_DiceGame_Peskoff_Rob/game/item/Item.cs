@@ -4,7 +4,7 @@ using GD14_1133_DiceGame_Peskoff_Rob.game.@enum;
 using GD14_1133_DiceGame_Peskoff_Rob.game.@object;
 
 namespace GD14_1133_DiceGame_Peskoff_Rob.game.item {
-	internal abstract class Item(Dice dice) : Entity {
+	public abstract class Item(Dice dice) : Entity {
 
 		protected readonly Dice dice = dice;
 		public int LastRoll => dice.GetLastRoll();

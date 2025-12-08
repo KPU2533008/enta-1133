@@ -1,0 +1,15 @@
+#  CSharp formatting rules:
+[*.cs]
+indent_style = tab
+indent_size = 4
+insert_final_newline = true
+csharp_new_line_before_open_brace = none
+csharp_new_line_before_else = false
+csharp_new_line_before_catch = false
+csharp_new_line_before_finally = false
+csharp_space_after_keywords_in_control_flow_statements = true
+csharp_space_within_parentheses_in_statements = false
+csharp_space_within_if_parentheses = true
+csharp_space_between_parentheses_of_control_flow_statements = true
+space_within_if_parentheses = true
+space_between_parentheses_of_control_flow_statements = true

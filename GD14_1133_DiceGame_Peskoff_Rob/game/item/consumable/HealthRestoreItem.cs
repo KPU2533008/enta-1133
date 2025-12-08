@@ -2,7 +2,7 @@
 using GD14_1133_DiceGame_Peskoff_Rob.game.@object;
 
 namespace GD14_1133_DiceGame_Peskoff_Rob.game.item.consumable {
-	internal abstract class HealthRestoreItem : Consumable {
+	public abstract class HealthRestoreItem : Consumable {
 
 		public HealthRestoreItem(Dice dice) : base(dice) {
 			TargetAllegiance = @enum.Allegiance.Friendly;

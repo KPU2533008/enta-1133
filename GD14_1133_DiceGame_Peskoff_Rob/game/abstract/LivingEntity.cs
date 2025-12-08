@@ -2,7 +2,7 @@
 using GD14_1133_DiceGame_Peskoff_Rob.game.@enum;
 
 namespace GD14_1133_DiceGame_Peskoff_Rob.game.@abstract {
-	internal abstract class LivingEntity(int maxHp) : Entity {
+	public abstract class LivingEntity(int maxHp) : Entity {
 
 		public int MaxHP {
 			get;
